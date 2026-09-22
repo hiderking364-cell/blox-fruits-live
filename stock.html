@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blox Fruits Live | Stock</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://pl28446783.profitablecpmratenetwork.com/f0/c4/bb/f0c4bb363e53a2caf1590e85bb37fba0.js"></script>
 </head>
 <body>
     <header>
-        <h1>⚔️ Blox Fruits Live</h1>
-        <p>Live Dealer Stock</p>
+        <div class="header-content">
+            <h1>⚔️ Blox Fruits Live</h1>
+            <p>Live Dealer Stock</p>
+        </div>
     </header>
 
     <nav>
@@ -19,22 +22,40 @@
         <a href="ai.html">Live AI</a>
     </nav>
 
+    <!-- 📢 TOP BANNER AD -->
+    <div class="ad-container ad-top">
+        <span class="ad-label">Advertisement</span>
+    </div>
+
     <main>
         <section>
-            <h2>Current Stock</h2>
+            <h2>🏪 Current Stock</h2>
+            <p class="section-desc">Normal Dealer rotates every 4 hours, Mirage Dealer every 2 hours. Source: FruityBlox API</p>
+            
             <div class="tabs">
-                <button id="tab-normal" class="active" onclick="showStock('normal')">Normal Dealer</button>
-                <button id="tab-mirage" onclick="showStock('mirage')">Mirage Dealer</button>
+                <button id="tab-normal" class="active" onclick="showStock('normal')">🏪 Normal Dealer</button>
+                <button id="tab-mirage" onclick="showStock('mirage')">🏝️ Mirage Dealer</button>
             </div>
+
             <div id="stock-list" class="values-grid">
                 <div class="loading">Fetching live stock...</div>
             </div>
             <p id="stock-timer"></p>
         </section>
+
+        <!-- 📢 IN-FEED AD -->
+        <div class="ad-container ad-infeed">
+            <span class="ad-label">Advertisement</span>
+        </div>
     </main>
 
+    <!-- 📢 BOTTOM BANNER AD -->
+    <div class="ad-container ad-bottom">
+        <span class="ad-label">Advertisement</span>
+    </div>
+
     <footer>
-        <p>© 2026 Blox Fruits Live. Data provided by FruityBlox.</p>
+        <p>© 2026 Blox Fruits Live. Data provided by <a href="https://fruityblox.com" target="_blank">FruityBlox</a>.</p>
     </footer>
 
     <script src="script.js"></script>
