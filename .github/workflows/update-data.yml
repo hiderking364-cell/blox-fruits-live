@@ -2,28 +2,22 @@ name: Update Live Data
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # كل 5 دقائق
-  workflow_dispatch:       # يسمح لك بتشغيله يدوياً
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
 
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          
       - name: Install dependencies
         run: pip install requests
-        
       - name: Fetch data
-        env:
-          PARSE_API_KEY: ${{ secrets.PARSE_API_KEY }}
         run: python fetch_data.py
-        
       - name: Commit and push
         run: |
           git config --local user.email "action@github.com"
