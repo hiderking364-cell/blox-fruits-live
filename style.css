@@ -1,20 +1,15 @@
-/* ============================================
-   Blox Fruits Live - Main Stylesheet
-   Design: Deep Ocean & Orange (Game Theme)
-   ============================================ */
-
 :root {
-    --bg-dark: #0b1120;       /* Deep Navy Background */
-    --bg-card: #1e293b;       /* Slate Card Background */
-    --bg-nav: #0f172a;        /* Darker Nav Background */
-    --accent: #f97316;        /* Vibrant Orange (CTA) */
-    --accent-hover: #fb923c;  /* Lighter Orange */
-    --text-main: #f8fafc;     /* Near White */
-    --text-muted: #94a3b8;    /* Muted Gray */
-    --border: #334155;        /* Subtle Borders */
-    --success: #22c55e;       /* Green for Good Values */
-    --danger: #ef4444;        /* Red for Bad Values */
-    --gold: #fbbf24;          /* Gold for Perm */
+    --bg-dark: #0b1120;
+    --bg-card: #1e293b;
+    --bg-nav: #0f172a;
+    --accent: #f97316;
+    --accent-hover: #fb923c;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border: #334155;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --gold: #fbbf24;
 }
 
 * {
@@ -31,7 +26,6 @@ body {
     min-height: 100vh;
 }
 
-/* Header */
 header {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     padding: 40px 20px;
@@ -53,7 +47,6 @@ header p {
     margin-top: 5px;
 }
 
-/* Navigation */
 nav {
     display: flex;
     justify-content: center;
@@ -84,7 +77,6 @@ nav a:hover, nav a.active {
     box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
 }
 
-/* Main Content */
 main {
     max-width: 1200px;
     margin: 40px auto;
@@ -109,7 +101,6 @@ h2 {
     font-size: 1.8em;
 }
 
-/* Cards */
 .card {
     background-color: var(--bg-card);
     padding: 20px;
@@ -131,7 +122,6 @@ h2 {
     margin-bottom: 10px;
 }
 
-/* Search Bar */
 #search-input, #fruit-search {
     width: 100%;
     padding: 18px;
@@ -150,7 +140,6 @@ h2 {
     box-shadow: 0 0 15px rgba(249, 115, 22, 0.3), inset 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-/* Values Table Grid */
 .values-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -219,7 +208,6 @@ h2 {
     margin-top: 8px;
 }
 
-/* Stock Timer */
 #stock-timer {
     text-align: center;
     font-size: 1.2em;
@@ -232,7 +220,6 @@ h2 {
     border: 1px solid var(--border);
 }
 
-/* AI Chat */
 #chat-box {
     background-color: var(--bg-card);
     border-radius: 12px;
@@ -309,7 +296,6 @@ button:hover {
     transform: scale(1.05);
 }
 
-/* Tabs */
 .tabs {
     display: flex;
     gap: 10px;
@@ -329,7 +315,6 @@ button:hover {
     border-color: var(--accent);
 }
 
-/* Footer */
 footer {
     text-align: center;
     padding: 30px;
@@ -339,7 +324,6 @@ footer {
     border-top: 2px solid var(--border);
 }
 
-/* Loading Spinner */
 .loading {
     text-align: center;
     padding: 40px;
@@ -363,7 +347,6 @@ footer {
     to { transform: rotate(360deg); }
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     header h1 { font-size: 2em; }
     nav { flex-direction: column; align-items: center; }
