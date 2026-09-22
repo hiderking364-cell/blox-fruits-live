@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blox Fruits Live | Values</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://pl28446783.profitablecpmratenetwork.com/f0/c4/bb/f0c4bb363e53a2caf1590e85bb37fba0.js"></script>
 </head>
 <body>
     <header>
-        <h1>⚔️ Blox Fruits Live</h1>
-        <p>Live Trade Values & Perm Prices</p>
+        <div class="header-content">
+            <h1>⚔️ Blox Fruits Live</h1>
+            <p>Live Trade Values & Perm Prices</p>
+        </div>
     </header>
 
     <nav>
@@ -19,25 +22,41 @@
         <a href="ai.html">Live AI</a>
     </nav>
 
+    <!-- 📢 TOP BANNER AD -->
+    <div class="ad-container ad-top">
+        <span class="ad-label">Advertisement</span>
+    </div>
+
     <main>
         <section>
-            <h2>Live Values</h2>
-            <p style="color: var(--text-muted); margin-bottom: 15px;">Data updates automatically. Physical value shown first, Permanent value highlighted in gold.</p>
+            <h2>💰 Live Values</h2>
+            <p class="section-desc">Data updates automatically. Physical value shown first, Permanent value highlighted in gold. Source: BloxFruitsValues API</p>
             
             <div class="tabs">
-                <button id="tab-fruits" class="active" onclick="loadValues('fruits')">Fruits</button>
-                <button id="tab-limiteds" onclick="loadValues('limiteds')">Limiteds</button>
-                <button id="tab-gamepasses" onclick="loadValues('gamepasses')">Gamepasses</button>
+                <button id="tab-fruits" class="active" onclick="loadValues('fruits')">🍎 Fruits</button>
+                <button id="tab-limiteds" onclick="loadValues('limiteds')">🎃 Limiteds</button>
+                <button id="tab-gamepasses" onclick="loadValues('gamepasses')">🎮 Gamepasses</button>
+                <button id="tab-permanents" onclick="loadValues('permanents')">⭐ Permanents</button>
             </div>
 
             <div id="values-list" class="values-grid">
                 <div class="loading">Loading live values...</div>
             </div>
         </section>
+
+        <!-- 📢 IN-FEED AD -->
+        <div class="ad-container ad-infeed">
+            <span class="ad-label">Advertisement</span>
+        </div>
     </main>
 
+    <!-- 📢 BOTTOM BANNER AD -->
+    <div class="ad-container ad-bottom">
+        <span class="ad-label">Advertisement</span>
+    </div>
+
     <footer>
-        <p>© 2026 Blox Fruits Live. Data provided by BloxFruitsValues.</p>
+        <p>© 2026 Blox Fruits Live. Data provided by <a href="https://bloxfruitsvalues.com" target="_blank">BloxFruitsValues</a>.</p>
     </footer>
 
     <script src="script.js"></script>
