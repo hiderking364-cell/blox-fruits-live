@@ -1,16 +1,16 @@
 // ============================================
 // Blox Fruits Live - Main JavaScript
-// API Key Included for immediate testing
+// Both API Keys Included
 // ============================================
 
-const PARSE_API_KEY = 'pmx_b0bc47ca05c6dbc49dc14bb94be36b53'; // مفتاحك هنا
+// 🔑 مفاتيح API (موجودة هنا بناءً على طلبك)
+const PARSE_API_KEY = 'pmx_b0bc47ca05c6dbc49dc14bb94be36b53';
+const GEMINI_API_KEY = 'AIzaSyD2Fsjvhl3sMV1KU8X6gnXi0zylHWaFpQg';
 
-// API Endpoints
-const STOCK_API = 'https://api.parse.bot/scraper/e534d388-6640-4c19-b9b6-b2ba12930793/get_stock';
 const VALUES_API = 'https://api.parse.bot/scraper/66e0bf14-56ac-462d-88c7-8469b6d631e9/get_all_fruits';
 
 // ============================================
-// 1. LIVE STOCK FUNCTIONALITY
+// 1. LIVE STOCK
 // ============================================
 
 let globalStockData = null;
@@ -22,18 +22,26 @@ async function loadStock() {
 
     try {
         stockContainer.innerHTML = '<div class="loading">Fetching live stock...</div>';
-        const response = await fetch(STOCK_API, {
-            headers: { 'X-API-Key': PARSE_API_KEY }
-        });
-        
-        if (!response.ok) throw new Error('Failed to fetch stock');
+        const response = await fetch('data/stock.json');
+        if (!response.ok) throw new Error('Stock file not found. Run GitHub Action.');
         
         globalStockData = await response.json();
-        showStock('normal'); // Show normal by default
-
+        showStock('normal');
     } catch (error) {
         console.error('Stock Error:', error);
-        stockContainer.innerHTML = `<div class="card" style="border-left-color: var(--danger);">Failed to load stock data. Check your API key or try again later.</div>`;
+        // محاولة الاتصال المباشر بالـ API إذا فشل الملف المحلي
+        try {
+            const directResponse = await fetch('https://api.parse.bot/scraper/e534d388-6640-4c19-b9b6-b2ba12930793/get_stock', {
+                headers: { 'X-API-Key': PARSE_API_KEY }
+            });
+            if (directResponse.ok) {
+                globalStockData = await directResponse.json();
+                showStock('normal');
+                return;
+            }
+        } catch (e) {}
+        
+        stockContainer.innerHTML = `<div class="card" style="border-left-color: var(--danger);">Failed to load stock. ${error.message}</div>`;
     }
 }
 
@@ -41,7 +49,6 @@ function showStock(type) {
     const stockContainer = document.getElementById('stock-list');
     if (!stockContainer || !globalStockData) return;
 
-    // Update active tab styling
     const tabNormal = document.getElementById('tab-normal');
     const tabMirage = document.getElementById('tab-mirage');
     if (tabNormal) tabNormal.classList.toggle('active', type === 'normal');
@@ -60,95 +67,74 @@ function showStock(type) {
             <img src="${fruit.image || 'https://via.placeholder.com/60'}" alt="${fruit.name}" onerror="this.style.display='none'">
             <div class="item-name">${fruit.name}</div>
             <div class="item-rarity">${fruit.type || 'Fruit'}</div>
-            <div class="stat-row">
-                <span class="stat-label">Beli Price:</span>
-                <span class="stat-value">${fruit.price_beli ? fruit.price_beli.toLocaleString() : 'N/A'}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Robux Price:</span>
-                <span class="stat-value">${fruit.price_robux || 'N/A'}</span>
-            </div>
+            <div class="stat-row"><span class="stat-label">Beli:</span><span class="stat-value">${fruit.price_beli ? fruit.price_beli.toLocaleString() : 'N/A'}</span></div>
+            <div class="stat-row"><span class="stat-label">Robux:</span><span class="stat-value">${fruit.price_robux || 'N/A'}</span></div>
         </div>
     `).join('');
 
-    // Simple timer display
     if (timerContainer) {
         const now = new Date();
         const nextUpdate = new Date(now);
-        if (type === 'normal') {
-            nextUpdate.setHours(Math.ceil(now.getHours() / 4) * 4, 0, 0, 0);
-        } else {
-            nextUpdate.setHours(Math.ceil(now.getHours() / 2) * 2, 0, 0, 0);
-        }
+        if (type === 'normal') nextUpdate.setHours(Math.ceil(now.getHours() / 4) * 4, 0, 0, 0);
+        else nextUpdate.setHours(Math.ceil(now.getHours() / 2) * 2, 0, 0, 0);
         const diff = Math.floor((nextUpdate - now) / 60000);
-        timerContainer.textContent = `⏳ Next ${dealerName} restock in approximately ${diff} minutes.`;
+        timerContainer.textContent = `⏳ Next ${dealerName} restock in ~${diff} minutes.`;
     }
 }
 
 // ============================================
-// 2. LIVE VALUES FUNCTIONALITY (WITH PERM)
+// 2. LIVE VALUES
 // ============================================
-
-let globalValuesData = null;
 
 async function loadValues(category = 'fruits') {
     const valuesContainer = document.getElementById('values-list');
     if (!valuesContainer) return;
 
-    // Update active tab styling
-    const tabFruits = document.getElementById('tab-fruits');
-    const tabLimiteds = document.getElementById('tab-limiteds');
-    const tabGamepasses = document.getElementById('tab-gamepasses');
-    if (tabFruits) tabFruits.classList.toggle('active', category === 'fruits');
-    if (tabLimiteds) tabLimiteds.classList.toggle('active', category === 'limiteds');
-    if (tabGamepasses) tabGamepasses.classList.toggle('active', category === 'gamepasses');
+    ['tab-fruits', 'tab-limiteds', 'tab-gamepasses'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('active');
+    });
+    const activeTab = document.getElementById(category === 'fruits' ? 'tab-fruits' : category === 'limiteds' ? 'tab-limiteds' : 'tab-gamepasses');
+    if (activeTab) activeTab.classList.add('active');
 
     try {
         valuesContainer.innerHTML = '<div class="loading">Loading live values...</div>';
         
-        let apiCategory = 'fruits';
-        if (category === 'limiteds') apiCategory = 'limiteds';
-        if (category === 'gamepasses') apiCategory = 'gamepasses';
+        let data = null;
+        // محاولة القراءة من الملف المحلي أولاً
+        try {
+            const response = await fetch('data/values.json');
+            if (response.ok) data = await response.json();
+        } catch (e) {}
 
-        const response = await fetch(`${VALUES_API}?category=${apiCategory}`, {
-            headers: { 'X-API-Key': PARSE_API_KEY }
-        });
+        // إذا لم يوجد ملف محلي، اتصل مباشرة بالـ API
+        if (!data) {
+            const response = await fetch(`${VALUES_API}?category=${category}`, {
+                headers: { 'X-API-Key': PARSE_API_KEY }
+            });
+            if (!response.ok) throw new Error('Failed to fetch values');
+            data = await response.json();
+        }
 
-        if (!response.ok) throw new Error('Failed to fetch values');
+        let items = [];
+        if (Array.isArray(data)) items = data;
+        else if (data.fruits) items = data.fruits;
+        else if (data.items) items = data.items;
+        else if (data.data) items = data.data;
+        else for (const key in data) { if (Array.isArray(data[key])) { items = data[key]; break; } }
 
-        const data = await response.json();
-        globalValuesData = data;
-        renderValues(data, category);
-
+        renderValues(items, category);
     } catch (error) {
         console.error('Values Error:', error);
-        valuesContainer.innerHTML = `<div class="card" style="border-left-color: var(--danger);">Failed to load values. Check your API key or try again later.</div>`;
+        valuesContainer.innerHTML = `<div class="card" style="border-left-color: var(--danger);">Failed to load values: ${error.message}</div>`;
     }
 }
 
-function renderValues(data, category) {
+function renderValues(items, category) {
     const valuesContainer = document.getElementById('values-list');
     if (!valuesContainer) return;
 
-    let items = [];
-    if (Array.isArray(data)) {
-        items = data;
-    } else if (data.fruits) {
-        items = data.fruits;
-    } else if (data.items) {
-        items = data.items;
-    } else if (data.data) {
-        items = data.data;
-    } else {
-        for (const key in data) {
-            if (Array.isArray(data[key])) {
-                items = data[key];
-                break;
-            }
-        }
-    }
-
-    if (items.length === 0) {
+    if (!items || items.length === 0) {
         valuesContainer.innerHTML = '<div class="card">No items found for this category.</div>';
         return;
     }
@@ -156,54 +142,27 @@ function renderValues(data, category) {
     valuesContainer.innerHTML = items.map(item => {
         let tradeValue = item.trade_value;
         if (typeof tradeValue === 'number') {
-            tradeValue = tradeValue >= 1000000 
-                ? (tradeValue / 1000000).toFixed(2) + 'M' 
-                : tradeValue.toLocaleString();
-        } else if (tradeValue === null || tradeValue === undefined) {
-            tradeValue = 'N/A';
-        }
+            tradeValue = tradeValue >= 1000000 ? (tradeValue / 1000000).toFixed(2) + 'M' : tradeValue.toLocaleString();
+        } else { tradeValue = 'N/A'; }
 
-        const hasPermValue = item.perm_trade_value !== undefined && item.perm_trade_value !== null;
-        let permValueDisplay = '';
-        
-        if (hasPermValue) {
-            let permVal = item.perm_trade_value;
-            if (typeof permVal === 'number') {
-                permVal = permVal >= 1000000 
-                    ? (permVal / 1000000).toFixed(2) + 'M' 
-                    : permVal.toLocaleString();
-            }
-            permValueDisplay = `
-                <div class="stat-row perm-value">
-                    <span class="stat-label">⭐ Perm Value:</span>
-                    <span class="stat-value">${permVal}</span>
-                </div>`;
-        } else if (category === 'fruits' || category === 'fruits') {
-            permValueDisplay = `
-                <div class="stat-row perm-value">
-                    <span class="stat-label">⭐ Perm Value:</span>
-                    <span class="stat-value" style="color: var(--text-muted);">Check API</span>
-                </div>`;
+        const hasPerm = item.perm_trade_value !== undefined && item.perm_trade_value !== null;
+        let permDisplay = '';
+        if (hasPerm) {
+            let pv = item.perm_trade_value;
+            if (typeof pv === 'number') pv = pv >= 1000000 ? (pv / 1000000).toFixed(2) + 'M' : pv.toLocaleString();
+            permDisplay = `<div class="stat-row perm-value"><span class="stat-label">⭐ Perm Value:</span><span class="stat-value">${pv}</span></div>`;
         }
-
-        const rarityColor = getRarityColor(item.rarity);
 
         return `
         <div class="value-item">
             <img src="${item.image || 'https://via.placeholder.com/60'}" alt="${item.name}" onerror="this.style.display='none'">
             <div class="item-name">${item.name}</div>
-            <div class="item-rarity" style="color: ${rarityColor}">${item.rarity || 'Unknown'}</div>
-            <div class="stat-row">
-                <span class="stat-label">Trade Value:</span>
-                <span class="stat-value">${tradeValue}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Demand:</span>
-                <span class="stat-value">${item.demand || 'N/A'} / 10</span>
-            </div>
-            ${permValueDisplay}
-        </div>
-    `}).join('');
+            <div class="item-rarity" style="color: ${getRarityColor(item.rarity)}">${item.rarity || 'Unknown'}</div>
+            <div class="stat-row"><span class="stat-label">Trade Value:</span><span class="stat-value">${tradeValue}</span></div>
+            <div class="stat-row"><span class="stat-label">Demand:</span><span class="stat-value">${item.demand || 'N/A'}/10</span></div>
+            ${permDisplay}
+        </div>`;
+    }).join('');
 }
 
 function getRarityColor(rarity) {
@@ -218,7 +177,7 @@ function getRarityColor(rarity) {
 }
 
 // ============================================
-// 3. SEARCH FUNCTIONALITY (Home Page)
+// 3. SEARCH
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -240,27 +199,29 @@ async function performSearch(query) {
     if (!resultsContainer) return;
 
     try {
-        const [fruitsRes, limitedsRes, gamepassesRes] = await Promise.all([
-            fetch(`${VALUES_API}?category=fruits`, { headers: { 'X-API-Key': PARSE_API_KEY } }),
-            fetch(`${VALUES_API}?category=limiteds`, { headers: { 'X-API-Key': PARSE_API_KEY } }),
-            fetch(`${VALUES_API}?category=gamepasses`, { headers: { 'X-API-Key': PARSE_API_KEY } })
-        ]);
-
-        const fruits = await fruitsRes.json();
-        const limiteds = await limitedsRes.json();
-        const gamepasses = await gamepassesRes.json();
-
         let allItems = [];
-        [fruits, limiteds, gamepasses].forEach(data => {
-            if (Array.isArray(data)) allItems.push(...data);
-            else if (data.fruits) allItems.push(...data.fruits);
-            else if (data.items) allItems.push(...data.items);
-            else if (data.data) allItems.push(...data.data);
-        });
+        try {
+            const response = await fetch('data/values.json');
+            if (response.ok) {
+                const data = await response.json();
+                if (Array.isArray(data)) allItems = data;
+                else if (data.fruits) allItems = data.fruits;
+                else if (data.items) allItems = data.items;
+                else if (data.data) allItems = data.data;
+            }
+        } catch (e) {}
 
-        const filtered = allItems.filter(item => 
-            item.name && item.name.toLowerCase().includes(query)
-        );
+        if (allItems.length === 0) {
+            const response = await fetch(`${VALUES_API}?category=fruits`, {
+                headers: { 'X-API-Key': PARSE_API_KEY }
+            });
+            const data = await response.json();
+            if (Array.isArray(data)) allItems = data;
+            else if (data.fruits) allItems = data.fruits;
+            else if (data.items) allItems = data.items;
+        }
+
+        const filtered = allItems.filter(item => item.name && item.name.toLowerCase().includes(query));
 
         if (filtered.length === 0) {
             resultsContainer.innerHTML = '<div class="card">No results found.</div>';
@@ -268,48 +229,26 @@ async function performSearch(query) {
         }
 
         resultsContainer.innerHTML = filtered.slice(0, 12).map(item => {
-            let tradeValue = item.trade_value;
-            if (typeof tradeValue === 'number') {
-                tradeValue = tradeValue >= 1000000 
-                    ? (tradeValue / 1000000).toFixed(2) + 'M' 
-                    : tradeValue.toLocaleString();
-            } else {
-                tradeValue = 'N/A';
-            }
-
-            return `
-            <div class="value-item">
-                <img src="${item.image || 'https://via.placeholder.com/60'}" alt="${item.name}" onerror="this.style.display='none'">
+            let tv = item.trade_value;
+            if (typeof tv === 'number') tv = tv >= 1000000 ? (tv / 1000000).toFixed(2) + 'M' : tv.toLocaleString();
+            else tv = 'N/A';
+            return `<div class="value-item">
+                <img src="${item.image || 'https://via.placeholder.com/60'}" onerror="this.style.display='none'">
                 <div class="item-name">${item.name}</div>
                 <div class="item-rarity">${item.rarity || 'Item'}</div>
-                <div class="stat-row">
-                    <span class="stat-label">Value:</span>
-                    <span class="stat-value">${tradeValue}</span>
-                </div>
+                <div class="stat-row"><span class="stat-label">Value:</span><span class="stat-value">${tv}</span></div>
             </div>`;
         }).join('');
-
     } catch (error) {
-        console.error('Search Error:', error);
-        resultsContainer.innerHTML = '<div class="card">Search failed. Please try again.</div>';
+        resultsContainer.innerHTML = '<div class="card">Search failed.</div>';
     }
 }
 
 // ============================================
-// 4. AI CHAT FUNCTIONALITY
+// 4. LIVE AI - Google Gemini
 // ============================================
 
-const aiResponses = {
-    'hello': 'Hello! How can I help you with Blox Fruits today?',
-    'hi': 'Hey there! Ask me about fruits, swords, or strategies.',
-    'best fruit': 'For PvP, Kitsune and Dragon are top tier. For grinding, Buddha and Magma are excellent.',
-    'how to get superhuman': 'You need 4 fighting styles at 300 mastery (Dark Step, Electric, Water Kung Fu, Dragon Breath), then 3,000,000 Beli. Talk to Martial Arts Master in Snow Mountain.',
-    'best sword': 'Cursed Dual Katana (CDK) is considered the best overall. Dark Blade is great for PvP.',
-    'how to get godhuman': 'Master 5 fighting styles to 400, then talk to Ancient Monk in Floating Turtle Island. Costs 5,000,000 Beli and 5,000 Fragments.',
-    'default': 'I can help with fruit values, sword recommendations, fighting style guides, and more. Could you rephrase your question?'
-};
-
-function sendMessage() {
+async function sendMessage() {
     const input = document.getElementById('chat-input');
     const message = input.value.trim();
     if (!message) return;
@@ -317,29 +256,62 @@ function sendMessage() {
     addChatMessage(message, 'user');
     input.value = '';
 
-    setTimeout(() => {
-        const response = getAIResponse(message.toLowerCase());
-        addChatMessage(response, 'ai');
-    }, 500);
-}
+    const chatBox = document.getElementById('chat-box');
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'chat-message ai';
+    loadingDiv.id = 'ai-loading';
+    loadingDiv.textContent = 'Thinking...';
+    chatBox.appendChild(loadingDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-function getAIResponse(query) {
-    for (const key in aiResponses) {
-        if (key !== 'default' && query.includes(key)) {
-            return aiResponses[key];
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: `You are Live AI, a helpful and friendly Blox Fruits expert assistant for the website "Blox Fruits Live". 
+
+Rules:
+1. Understand the user's question even if they have spelling mistakes or use different languages (Arabic, English, Spanish, etc.).
+2. Always respond in the SAME language the user used.
+3. If they ask about a fruit, provide its trade value, demand, and how to get it.
+4. If they ask about a sword or fighting style, provide how to get it and its best use.
+5. Keep answers concise, accurate, and helpful.
+6. If you don't know something, say so honestly.
+
+User question: ${message}`
+                    }]
+                }]
+            })
+        });
+
+        const data = await response.json();
+        const loadingEl = document.getElementById('ai-loading');
+        if (loadingEl) loadingEl.remove();
+
+        if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+            addChatMessage(data.candidates[0].content.parts[0].text, 'ai');
+        } else if (data.error) {
+            addChatMessage(`AI Error: ${data.error.message}`, 'ai');
+        } else {
+            addChatMessage("Sorry, I couldn't process that. Please try again.", 'ai');
         }
+    } catch (error) {
+        const loadingEl = document.getElementById('ai-loading');
+        if (loadingEl) loadingEl.remove();
+        addChatMessage(`Connection error: ${error.message}`, 'ai');
     }
-    return aiResponses['default'];
 }
 
 function addChatMessage(text, sender) {
     const chatBox = document.getElementById('chat-box');
     if (!chatBox) return;
-
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `chat-message ${sender}`;
-    messageDiv.textContent = text;
-    chatBox.appendChild(messageDiv);
+    const div = document.createElement('div');
+    div.className = `chat-message ${sender}`;
+    div.textContent = text;
+    chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
@@ -353,11 +325,21 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
-// 5. INITIALIZATION
+// 5. LIVE STATS
 // ============================================
 
-setInterval(() => {
-    if (document.getElementById('stock-list')) {
-        loadStock();
+async function updateLiveStats() {
+    const stats = { 'stat-fruits': '1,200+', 'stat-swords': '150+', 'stat-players': '500K+' };
+    for (const [id, value] of Object.entries(stats)) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
     }
+}
+if (document.getElementById('live-stats')) updateLiveStats();
+
+// ============================================
+// 6. AUTO-REFRESH
+// ============================================
+setInterval(() => {
+    if (document.getElementById('stock-list')) loadStock();
 }, 300000);
